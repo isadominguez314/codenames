@@ -30,7 +30,6 @@ init url =
             case url.host of
                 "localhost" ->
                     { url | port_ = Just 8080, path = "", query = Nothing, fragment = Nothing }
-
                 _ ->
                     { url
                         | host = "codenames-production-6385.up.railway.app"
