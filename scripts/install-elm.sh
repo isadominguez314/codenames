@@ -2,10 +2,7 @@
 set -eu
 
 mkdir -p .elm-bin
-
-if [ -x .elm-bin/elm ]; then
-  exit 0
-fi
+rm -f .elm-bin/elm .elm-bin/elm.gz
 
 case "$(uname -s)" in
   Darwin)
@@ -21,7 +18,17 @@ case "$(uname -s)" in
 esac
 
 curl -fsSL "$url" -o .elm-bin/elm.gz
+if ! gzip -t .elm-bin/elm.gz; then
+  echo "Downloaded Elm archive was corrupt or incomplete" >&2
+  exit 1
+fi
+
 gzip -dc .elm-bin/elm.gz > .elm-bin/elm
 chmod +x .elm-bin/elm
+
+if ! file .elm-bin/elm | grep -Eiq 'ELF|Mach-O'; then
+  echo "Downloaded Elm binary is invalid for this platform" >&2
+  exit 1
+fi
 
 export PATH="$PWD/.elm-bin:$PATH"
