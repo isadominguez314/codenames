@@ -11,7 +11,6 @@ import Html.Events exposing (onBlur, onClick, onInput, onSubmit)
 import Html.Lazy exposing (lazy, lazy2, lazy3)
 import Http
 import Json.Decode
-import Loading exposing (LoaderType(..), defaultConfig)
 import Side
 import Url
 import Url.Builder as UrlBuilder
@@ -421,7 +420,7 @@ viewGameLoading : String -> List (Html Msg)
 viewGameLoading id =
     [ viewHeader
     , div [ Attr.id "game-loading" ]
-        [ Loading.render Circle { defaultConfig | size = 100, color = "#b7ec8a" } Loading.On
+        [ h2 [] [ text "Loading game..." ]
         ]
     ]
 
