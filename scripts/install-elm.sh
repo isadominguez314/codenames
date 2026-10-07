@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -eu
 
+rm -rf elm-stuff
+rm -rf "$HOME/.elm"
 mkdir -p .elm-bin
 rm -f .elm-bin/elm .elm-bin/elm.gz
 
