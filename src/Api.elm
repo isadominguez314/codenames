@@ -31,13 +31,15 @@ init url =
                 "localhost" ->
                     { url | port_ = Just 8080, path = "", query = Nothing, fragment = Nothing }
 
-                "www.codenamesgreen.com" ->
-                    -- TODO: Avoid hardcoding any specific hostnames.
-                    { url | host = "api.codenamesgreen.com", path = "", query = Nothing, fragment = Nothing }
-
                 _ ->
-                    { url | host = "api." ++ url.host, path = "", query = Nothing, fragment = Nothing }
-    in
+                    { url
+                        | host = "codenames-production-6385.up.railway.app"
+                        , port_ = Nothing
+                        , path = ""
+                        , query = Nothing
+                        , fragment = Nothing
+                    }
+            in
     { baseUrl = baseUrl }
 
 
