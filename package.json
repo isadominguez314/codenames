@@ -5,6 +5,11 @@
   "repository": "git@github.com:jbowens/codenamesgreen.git",
   "author": "Jackson Owens <jackson_owens@alumni.brown.edu>",
   "license": "MIT",
+  "scripts": {
+    "build": "parcel build src/index.html && cp -R src/images dist/ && cp src/robots.txt dist/",
+    "start:api": "go run ./cmd/greenapid",
+    "start:frontend": "parcel src/index.html"
+  },
   "devDependencies": {
     "cssnano": "^4.1.10",
     "elm-hot": "^1.1.1",

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math/rand"
 	"net/http"
+	"os"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -101,8 +102,9 @@ func (h *handler) handleIndex(rw http.ResponseWriter, req *http.Request) {
 	for {
 		w1 := strings.ToLower(h.allWords[h.rand.Int63n(int64(len(h.allWords)))])
 		w2 := strings.ToLower(h.allWords[h.rand.Int63n(int64(len(h.allWords)))])
-		id := fmt.Sprintf("%s-%s", w1, w2)
-		if _, ok := h.games[id]; !ok {
+		candidate := fmt.Sprintf("%s-%s", w1, w2)
+		if _, ok := h.games[candidate]; !ok {
+			id = candidate
 			break
 		}
 	}
@@ -443,7 +445,21 @@ func writeJSON(rw http.ResponseWriter, resp interface{}) {
 }
 
 func DefaultWordlists() (map[string][]string, error) {
-	matches, err := filepath.Glob("wordlists/*txt")
+	dir := os.Getenv("WORDLISTS_DIR")
+	if dir == "" {
+		dir = "wordlists"
+	}
+
+	if _, err := os.Stat(dir); err != nil {
+		if exe, e := os.Executable(); e == nil {
+			candidate := filepath.Join(filepath.Dir(exe), "wordlists")
+			if _, e2 := os.Stat(candidate); e2 == nil {
+				dir = candidate
+			}
+		}
+	}
+
+	matches, err := filepath.Glob(filepath.Join(dir, "*txt"))
 	if err != nil {
 		return nil, err
 	}

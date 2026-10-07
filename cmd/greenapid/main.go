@@ -2,6 +2,7 @@ package main
 
 import (
 	"net/http"
+	"os"
 
 	"github.com/jbowens/codenamesgreen/gameapi"
 )
@@ -13,6 +14,11 @@ func main() {
 	}
 
 	h := gameapi.Handler(wordLists)
-	err = http.ListenAndServe(":8080", h)
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+
+	err = http.ListenAndServe(":"+port, h)
 	panic(err)
 }

@@ -1,0 +1,8 @@
+node_modules
+elm-stuff
+.git
+.gitignore
+README.md
+.nvmrc
+.DS_Store
+npm-debug.log
