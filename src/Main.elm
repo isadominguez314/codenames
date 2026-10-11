@@ -5,7 +5,7 @@ import Browser
 import Browser.Navigation as Nav
 import Dict
 import Game
-import Html exposing (Html, a, button, div, form, h1, h2, h3, i, input, label, p, span, strong, text)
+import Html exposing (Html, a, button, div, form, h1, h2, h3, i, input, label, option, p, select, span, strong, text)
 import Html.Attributes as Attr
 import Html.Events exposing (onBlur, onClick, onInput, onSubmit)
 import Html.Lazy exposing (lazy, lazy2, lazy3)
@@ -28,6 +28,7 @@ type alias Model =
     , user : User.User
     , page : Page
     , apiClient : Api.Client
+    , selectedCategory : String
     }
 
 
@@ -56,6 +57,7 @@ init encodedUser url key =
               , user = User.User "" ""
               , page = Error (Json.Decode.errorToString e)
               , apiClient = Api.init url
+              , selectedCategory = "green"
               }
             , Cmd.none
             )
@@ -66,6 +68,7 @@ init encodedUser url key =
                 , user = user
                 , page = Home ""
                 , apiClient = Api.init url
+                , selectedCategory = "green"
                 }
 
 
@@ -79,6 +82,7 @@ type Msg
     | UrlChanged Url.Url
     | IndexData (Result Http.Error Api.Index)
     | IdChanged String
+    | CategoryChanged String
     | SubmitNewGame
     | NextGame
     | PickSide Side.Side
@@ -120,6 +124,9 @@ update msg model =
 
         ( IdChanged id, Home _ ) ->
             ( { model | page = Home id }, Cmd.none )
+
+        ( CategoryChanged category, _ ) ->
+            ( { model | selectedCategory = category }, Cmd.none )
 
         ( SubmitNewGame, Home id ) ->
             ( model, Nav.pushUrl model.key (UrlBuilder.relative [ id ] []) )
@@ -223,6 +230,7 @@ stepGameView model id prevSeed =
     , Api.maybeMakeGame
         { gameId = id
         , prevSeed = prevSeed
+        , category = model.selectedCategory
         , toMsg = GotGame
         , client = model.apiClient
         }
@@ -254,7 +262,7 @@ view model =
             viewNotFound
 
         Home id ->
-            viewHome id
+            viewHome id model.selectedCategory
 
         GameLoading id ->
             { title = "Codenames Green"
@@ -262,7 +270,7 @@ view model =
             }
 
         GameInProgress game chat gameView ->
-            viewGameInProgress game chat gameView
+            viewGameInProgress game chat gameView model.selectedCategory
 
         Error msg ->
             viewError msg
@@ -309,17 +317,17 @@ viewError msg =
         |> viewLayout (Just "Error")
 
 
-viewGameInProgress : Game.Model -> String -> GameView -> Browser.Document Msg
-viewGameInProgress g chatMessage gameView =
+viewGameInProgress : Game.Model -> String -> GameView -> String -> Browser.Document Msg
+viewGameInProgress g chatMessage gameView selectedCategory =
     div [ Attr.id "game" ]
         [ Html.map GameUpdate (Game.viewBoard g)
-        , div [ Attr.id "sidebar" ] (viewSidebar g chatMessage gameView)
+        , div [ Attr.id "sidebar" ] (viewSidebar g chatMessage gameView selectedCategory)
         ]
         |> viewLayout Nothing
 
 
-viewSidebar : Game.Model -> String -> GameView -> List (Html Msg)
-viewSidebar g chatMessage gameView =
+viewSidebar : Game.Model -> String -> GameView -> String -> List (Html Msg)
+viewSidebar g chatMessage gameView selectedCategory =
     let
         sides =
             Dict.values g.players
@@ -342,7 +350,7 @@ viewSidebar g chatMessage gameView =
             viewSettings g settings
 
         ( Just side, ShowDefault ) ->
-            viewActiveSidebar g side chatMessage
+            viewActiveSidebar g side chatMessage selectedCategory
 
 
 viewSettings : Game.Model -> Settings -> List (Html Msg)
@@ -368,12 +376,12 @@ viewSettings g settings =
     ]
 
 
-viewActiveSidebar : Game.Model -> Side.Side -> String -> List (Html Msg)
-viewActiveSidebar g side chatMessage =
+viewActiveSidebar : Game.Model -> Side.Side -> String -> String -> List (Html Msg)
+viewActiveSidebar g side chatMessage selectedCategory =
     [ Html.map GameUpdate (lazy Game.viewStatus g)
     , Html.map GameUpdate (lazy2 Game.viewKeycard g side)
     , lazy3 viewEventBox g side chatMessage
-    , viewButtonRow
+    , viewButtonRow selectedCategory
     ]
 
 
@@ -388,10 +396,19 @@ viewEventBox g side chatMessage =
         ]
 
 
-viewButtonRow : Html Msg
-viewButtonRow =
+viewButtonRow : String -> Html Msg
+viewButtonRow selectedCategory =
     div [ Attr.id "button-row" ]
-        [ div [] [ button [ onClick NextGame ] [ text "Next game" ] ]
+        [ div [ Attr.class "category-picker" ]
+            [ label [ Attr.for "category-selector" ] [ text "Category" ]
+            , select [ Attr.id "category-selector", Attr.class "category-select", onInput CategoryChanged, Attr.value selectedCategory ]
+                [ option [ Attr.value "green", Attr.selected (selectedCategory == "green") ] [ text "ORIGINAL" ]
+                , option [ Attr.value "people", Attr.selected (selectedCategory == "people") ] [ text "FRIENDS + FAMILY" ]
+                , option [ Attr.value "pisa", Attr.selected (selectedCategory == "pisa") ] [ text "PIERCE + ISA" ]
+                , option [ Attr.value "sports", Attr.selected (selectedCategory == "sports") ] [ text "SPORTS" ]
+                ]
+            ]
+        , div [] [ button [ onClick NextGame ] [ text "Next game" ] ]
 
         -- TODO: add settings
         -- , div [] [ i [ Attr.id "open-settings", Attr.class "icon icon-button ion-ios-settings", onClick ToggleSettings ] [] ]
@@ -425,8 +442,8 @@ viewGameLoading id =
     ]
 
 
-viewHome : String -> Browser.Document Msg
-viewHome id =
+viewHome : String -> String -> Browser.Document Msg
+viewHome id selectedCategory =
     { title = "Codenames Green"
     , body =
         [ div [ Attr.id "home" ]
@@ -434,15 +451,32 @@ viewHome id =
             , p [] [ text "Play cooperative Codenames online across multiple devices on a shared board. To create a new game or join an existing game, enter a game identifier and click 'Play'." ]
             , form
                 [ Attr.id "new-game"
+                , Attr.class "home-form"
                 , onSubmit SubmitNewGame
                 ]
-                [ input
-                    [ Attr.id "game-id"
-                    , Attr.name "game-id"
-                    , Attr.value id
-                    , onInput IdChanged
+                [ div [ Attr.class "home-inputs" ]
+                    [ input
+                        [ Attr.id "game-id"
+                        , Attr.name "game-id"
+                        , Attr.value id
+                        , onInput IdChanged
+                        ]
+                        []
+                    , div [ Attr.class "category-picker home-picker" ]
+                        [ label [ Attr.for "category-selector-home" ] [ text "Category" ]
+                        , select
+                            [ Attr.id "category-selector-home"
+                            , Attr.class "category-select"
+                            , onInput CategoryChanged
+                            , Attr.value selectedCategory
+                            ]
+                            [ option [ Attr.value "green", Attr.selected (selectedCategory == "green") ] [ text "ORIGINAL" ]
+                            , option [ Attr.value "people", Attr.selected (selectedCategory == "people") ] [ text "FRIENDS + FAMILY" ]
+                            , option [ Attr.value "pisa", Attr.selected (selectedCategory == "pisa") ] [ text "PIERCE + ISA" ]
+                            , option [ Attr.value "sports", Attr.selected (selectedCategory == "sports") ] [ text "SPORTS" ]
+                            ]
+                        ]
                     ]
-                    []
                 , button [] [ text "Play" ]
                 ]
             ]

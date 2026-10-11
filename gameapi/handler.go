@@ -116,11 +116,40 @@ func (h *handler) handleIndex(rw http.ResponseWriter, req *http.Request) {
 }
 
 // POST /new-game
+func normalizeCategoryKey(value string) string {
+	value = strings.TrimSpace(strings.ToLower(value))
+	value = strings.ReplaceAll(value, " ", "")
+	value = strings.ReplaceAll(value, "_", "")
+	value = strings.ReplaceAll(value, "-", "")
+	value = strings.ReplaceAll(value, "+", "")
+	return value
+}
+
+func categoryWordList(wordLists map[string][]string, category string) ([]string, bool) {
+	if len(wordLists) == 0 {
+		return nil, false
+	}
+
+	requested := normalizeCategoryKey(category)
+	if requested == "" {
+		return nil, false
+	}
+
+	for name, words := range wordLists {
+		if normalizeCategoryKey(name) == requested {
+			return words, true
+		}
+	}
+
+	return nil, false
+}
+
 func (h *handler) handleNewGame(rw http.ResponseWriter, req *http.Request) {
 	var body struct {
-		GameID   string   `json:"game_id"`
-		Words    []string `json:"words,omitempty"`
-		PrevSeed *Seed    `json:"prev_seed,omitempty"` // a string because of js number precision
+		GameID    string   `json:"game_id"`
+		Words     []string `json:"words,omitempty"`
+		Category  string   `json:"category,omitempty"`
+		PrevSeed  *Seed    `json:"prev_seed,omitempty"` // a string because of js number precision
 	}
 	err := json.NewDecoder(req.Body).Decode(&body)
 	if err != nil || body.GameID == "" {
@@ -146,7 +175,11 @@ func (h *handler) handleNewGame(rw http.ResponseWriter, req *http.Request) {
 
 	words := body.Words
 	if len(words) == 0 {
-		words = h.allWords
+		if selectedWords, found := categoryWordList(h.wordLists, body.Category); found {
+			words = selectedWords
+		} else {
+			words = h.allWords
+		}
 	}
 	if len(words) < len(colorDistribution) {
 		writeError(rw, "too_few_words",

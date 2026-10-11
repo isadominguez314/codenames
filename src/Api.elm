@@ -235,6 +235,7 @@ longPollEvents r =
 maybeMakeGame :
     { gameId : String
     , prevSeed : Maybe String
+    , category : String
     , toMsg : Result Http.Error GameState -> msg
     , client : Client
     }
@@ -254,6 +255,7 @@ maybeMakeGame r =
                             Just seed ->
                                 E.string seed
                       )
+                    , ( "category", E.string r.category )
                     ]
                 )
         , expect = Http.expectJson r.toMsg (decoderGameState r.gameId)
