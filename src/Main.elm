@@ -12,6 +12,8 @@ import Html.Lazy exposing (lazy, lazy2, lazy3)
 import Http
 import Json.Decode
 import Side
+import Task
+import Time
 import Url
 import Url.Builder as UrlBuilder
 import Url.Parser as Parser exposing ((</>), Parser, map, oneOf, string, top)
@@ -29,6 +31,7 @@ type alias Model =
     , page : Page
     , apiClient : Api.Client
     , selectedCategory : String
+    , pendingSide : Maybe Side.Side
     }
 
 
@@ -58,6 +61,7 @@ init encodedUser url key =
               , page = Error (Json.Decode.errorToString e)
               , apiClient = Api.init url
               , selectedCategory = "green"
+              , pendingSide = Nothing
               }
             , Cmd.none
             )
@@ -69,6 +73,7 @@ init encodedUser url key =
                 , page = Home ""
                 , apiClient = Api.init url
                 , selectedCategory = "green"
+                , pendingSide = Nothing
                 }
 
 
@@ -84,6 +89,8 @@ type Msg
     | IdChanged String
     | CategoryChanged String
     | PlayerNameChanged String
+    | GenerateGuestName
+    | GuestNameGenerated Time.Posix
     | SubmitNewGame
     | NextGame
     | PickSide Side.Side
@@ -142,9 +149,41 @@ update msg model =
                         _ ->
                             model.page
             in
-            ( { model | user = updatedUser, page = updatedPage }
+            ( { model | user = updatedUser, page = updatedPage, pendingSide = Nothing }
             , User.store updatedUser
             )
+
+        ( GenerateGuestName, _ ) ->
+            ( model, Task.perform GuestNameGenerated Time.now )
+
+        ( GuestNameGenerated now, _ ) ->
+            let
+                number =
+                    modBy 9999 (Time.posixToMillis now)
+
+                generatedName =
+                    "Guest " ++ String.fromInt number
+
+                updatedUser =
+                    { id = model.user.id, name = generatedName }
+
+                updatedPage =
+                    case model.page of
+                        GameInProgress g chat gameView ->
+                            GameInProgress { g | player = { user = updatedUser, side = g.player.side } } chat gameView
+
+                        _ ->
+                            model.page
+
+                nextModel =
+                    { model | user = updatedUser, page = updatedPage, pendingSide = Nothing }
+            in
+            case model.pendingSide of
+                Just side ->
+                    pickSide nextModel side
+
+                Nothing ->
+                    ( nextModel, User.store updatedUser )
 
         ( SubmitNewGame, Home id ) ->
             ( model, Nav.pushUrl model.key (UrlBuilder.relative [ id ] []) )
@@ -175,28 +214,7 @@ update msg model =
             ( { model | page = GameInProgress gameModel "" ShowDefault }, gameCmd )
 
         ( PickSide side, GameInProgress oldGame chat gameView ) ->
-            let
-                oldPlayer =
-                    oldGame.player
-
-                updatedUser =
-                    { id = model.user.id, name = model.user.name }
-
-                game =
-                    { oldGame | player = { oldPlayer | user = updatedUser, side = Just side } }
-            in
-            ( { model | page = GameInProgress game chat gameView, user = updatedUser }
-            , Api.ping
-                -- Pinging will immediately record the change on the
-                -- server, without having to wait for the long
-                -- poll to make a new request.
-                { gameId = game.id
-                , seed = game.seed
-                , player = game.player
-                , toMsg = always NoOp
-                , client = model.apiClient
-                }
-            )
+            pickSide model side
 
         ( ChatMessageChanged message, GameInProgress g _ gameView ) ->
             ( { model | page = GameInProgress g message gameView }, Cmd.none )
@@ -230,6 +248,53 @@ update msg model =
 
         _ ->
             ( model, Cmd.none )
+
+
+pickSide : Model -> Side.Side -> ( Model, Cmd Msg )
+pickSide model side =
+    if String.trim model.user.name == "" then
+        ( { model | pendingSide = Just side }
+        , Task.perform GuestNameGenerated Time.now
+        )
+
+    else
+        let
+            updatedUser =
+                { id = model.user.id, name = model.user.name }
+
+            updatedPage =
+                case model.page of
+                    GameInProgress oldGame chat gameView ->
+                        let
+                            game =
+                                { oldGame | player = { user = updatedUser, side = Just side } }
+                        in
+                        GameInProgress game chat gameView
+
+                    _ ->
+                        model.page
+
+            nextModel =
+                { model | page = updatedPage, user = updatedUser, pendingSide = Nothing }
+        in
+        case model.page of
+            GameInProgress oldGame chat gameView ->
+                let
+                    game =
+                        { oldGame | player = { user = updatedUser, side = Just side } }
+                in
+                ( { nextModel | page = GameInProgress game chat gameView }
+                , Api.ping
+                    { gameId = game.id
+                    , seed = game.seed
+                    , player = game.player
+                    , toMsg = always NoOp
+                    , client = model.apiClient
+                    }
+                )
+
+            _ ->
+                ( nextModel, Cmd.none )
 
 
 stepUrl : Url.Url -> Model -> ( Model, Cmd Msg )

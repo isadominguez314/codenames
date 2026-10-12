@@ -536,6 +536,7 @@ viewWelcomeMessage =
     guesses until they tap a non-green word or choose to stop. Tapping a black 
     instantly loses the game. Try to reveal all words before the game ends after 9 
     turns. Good luck, I love you!!!
+    
     """ ]
 
 

@@ -314,7 +314,7 @@ input#game-id {
   font-weight: 700;
   letter-spacing: 0.09em;
   text-transform: uppercase;
-  color: #5d7d47;
+  color: #86b947;
 }
 
 #join-a-team .name-input-wrap input {
@@ -369,6 +369,12 @@ input#game-id {
   background: linear-gradient(180deg, #a7c5f5 0%, #6d9fe6 100%);
 }
 
+#join-a-team button {
+  font-family: "Exo 2", sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
 #join-a-team button .call-to-action {
   font-size: 1.2em;
   display: block;
@@ -380,6 +386,9 @@ input#game-id {
   display: block;
   font-size: 0.9em;
   opacity: 0.95;
+  font-family: "Source Sans Pro", "Trebuchet MS", sans-serif;
+  letter-spacing: 0.02em;
+  text-transform: none;
 }
 
 #events .team-pink,
