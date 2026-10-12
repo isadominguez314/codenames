@@ -110,6 +110,9 @@ status g =
             else if greens == 0 then
                 Won g.tokensConsumed
 
+            else if g.tokensConsumed >= 9 then
+                Lost greens
+
             else
                 InProgress turn greens g.tokensConsumed
 
@@ -389,6 +392,10 @@ viewStatus model =
                 [ div [] [ text "You won!" ] ]
 
         InProgress turn greens tokensConsumed ->
+            let
+                turnNumber =
+                    tokensConsumed + 1
+            in
             div [ Attr.id "status", Attr.class "in-progress" ]
                 (List.append
                     (if Just turn == model.player.side then
@@ -405,7 +412,7 @@ viewStatus model =
                         [ div [] [ text "You're clue giving." ] ]
                     )
                     [ div [] [ text (String.fromInt greens), span [ Attr.class "green-icon" ] [] ]
-                    , div [] [ text (String.fromInt tokensConsumed), text " ", i [ Attr.class "icon ion-ios-time" ] [] ]
+                    , div [] [ text ("Turn " ++ String.fromInt turnNumber ++ "/9") ]
                     ]
                 )
 

@@ -1,5 +1,7 @@
 body {
-  font-family: 'Source Sans Pro', 'Trebuchet MS', 'Lucida Grande', 'Bitstream Vera Sans', 'Helvetica Neue', sans-serif;
+  font-family:
+    "Source Sans Pro", "Trebuchet MS", "Lucida Grande", "Bitstream Vera Sans",
+    "Helvetica Neue", sans-serif;
   margin: 0;
   color: #293c4b;
   background: linear-gradient(180deg, #f4f9ef 0%, #eef6e6 100%);
@@ -33,7 +35,9 @@ body {
   backdrop-filter: blur(4px);
 }
 
-h1, h2, h3 {
+h1,
+h2,
+h3 {
   font-family: "Exo 2", sans-serif;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -49,7 +53,8 @@ h3 {
   margin: 0;
 }
 
-#not-found, #home {
+#not-found,
+#home {
   text-align: center;
   margin: 5vh 5vw;
   padding: 1em;
@@ -76,8 +81,9 @@ h3 {
 }
 
 @media screen and (min-width: 800px) {
-  #not-found, #home {
-	max-width: 600px;
+  #not-found,
+  #home {
+    max-width: 600px;
     margin: 5vh auto;
   }
 }
@@ -117,7 +123,9 @@ form#new-game button {
   font-weight: 700;
   letter-spacing: 0.04em;
   box-shadow: 0 8px 18px rgba(116, 168, 73, 0.2);
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
 }
 
 form#new-game button:hover {
@@ -135,7 +143,7 @@ input#game-id {
   border-radius: 12px;
   background: rgba(255, 255, 255, 0.75);
   color: #293c4b;
-  letter-spacing: .08em;
+  letter-spacing: 0.08em;
 }
 
 .category-picker {
@@ -167,9 +175,15 @@ input#game-id {
   padding: 0.75rem 2.5rem 0.75rem 0.8rem;
   font-size: 0.95rem;
   font-weight: 600;
-  background-image: linear-gradient(45deg, transparent 50%, #6a8f40 50%), linear-gradient(135deg, #6a8f40 50%, transparent 50%);
-  background-position: calc(100% - 18px) calc(50% - 2px), calc(100% - 12px) calc(50% - 2px);
-  background-size: 6px 6px, 6px 6px;
+  background-image:
+    linear-gradient(45deg, transparent 50%, #6a8f40 50%),
+    linear-gradient(135deg, #6a8f40 50%, transparent 50%);
+  background-position:
+    calc(100% - 18px) calc(50% - 2px),
+    calc(100% - 12px) calc(50% - 2px);
+  background-size:
+    6px 6px,
+    6px 6px;
   background-repeat: no-repeat;
   cursor: pointer;
 }
@@ -212,7 +226,7 @@ input#game-id {
   background: #82b34a;
   vertical-align: middle;
   border-radius: 0.1em;
-  margin: 0 .3em;
+  margin: 0 0.3em;
 }
 
 #board {
@@ -224,7 +238,7 @@ input#game-id {
 }
 
 #board .cell {
-  background: #EEE;
+  background: #eee;
   text-align: center;
   cursor: default;
   display: flex;
@@ -244,18 +258,19 @@ input#game-id {
 
 #board .green {
   background: #82b34a;
-  color: #FFF;
+  color: #fff;
 }
 
 #board .black {
   background: black;
-  color: #FFF;
+  color: #fff;
 }
 
-#board .time-token-a, #board .time-token-b {
+#board .time-token-a,
+#board .time-token-b {
   position: absolute;
   bottom: 0.25em;
-  color: #D2B48C;
+  color: #d2b48c;
   font-size: 2vw;
   display: flex;
   align-items: center;
@@ -263,12 +278,16 @@ input#game-id {
   justify-content: center;
 }
 
-#board .time-token-a { left: 0.5vw; }
-#board .time-token-b { left: 2.5vw; }
-#board.no-team .time-token-a, #board.no-team .time-token-b {
+#board .time-token-a {
+  left: 0.5vw;
+}
+#board .time-token-b {
+  left: 2.5vw;
+}
+#board.no-team .time-token-a,
+#board.no-team .time-token-b {
   display: none;
 }
-
 
 #sidebar {
   flex: auto;
@@ -314,7 +333,8 @@ input#game-id {
   margin: 1em;
 }
 
-#key-card, #key-list {
+#key-card,
+#key-list {
   flex: auto;
   cursor: pointer;
 }
@@ -337,8 +357,12 @@ input#game-id {
   text-decoration: line-through;
   opacity: 0.6;
 }
-#key-list .greens { color: #82b34a; }
-#key-list .tans { color: #D2B48C; }
+#key-list .greens {
+  color: #82b34a;
+}
+#key-list .tans {
+  color: #d2b48c;
+}
 #key-list ul {
   flex: 0 0 auto;
   padding: 0;
@@ -355,13 +379,18 @@ input#game-id {
   background: #000;
 }
 #key-card .tan {
-  background: #D2B48C;
+  background: #d2b48c;
 }
 #key-card .green {
   background: #82b34a;
 }
 #key-card .crossed.green {
-  background: linear-gradient(to top right, #82b34a calc(50% - 2px), #000, #82b34a calc(50% + 1px) );
+  background: linear-gradient(
+    to top right,
+    #82b34a calc(50% - 2px),
+    #000,
+    #82b34a calc(50% + 1px)
+  );
 }
 
 #event-log {
@@ -372,7 +401,9 @@ input#game-id {
   min-height: 0;
 }
 
-#events .side { color: #9d9d9d; }
+#events .side {
+  color: #9d9d9d;
+}
 
 #events .system-message {
   font-size: 0.8em;
@@ -383,7 +414,7 @@ input#game-id {
   flex: auto;
   overflow-y: scroll;
   padding: 0.5em;
-  border: 1px #EEE solid;
+  border: 1px #eee solid;
 }
 
 #event-log #events div {
@@ -406,10 +437,12 @@ input#game-id {
   padding: 0.25em;
   font-size: 1em;
   border-radius: 0.2em;
-  border: 1px #BBB solid;
+  border: 1px #bbb solid;
   margin-right: 0.5em;
 }
-#chat-form button, #button-row button, #status button {
+#chat-form button,
+#button-row button,
+#status button {
   font-family: "Exo 2", sans-serif;
   font-size: 0.9em;
   background: linear-gradient(180deg, #a8d86a 0%, #84bb47 100%);
@@ -422,11 +455,15 @@ input#game-id {
   box-shadow: 0 8px 18px rgba(116, 168, 73, 0.14);
 }
 
-#chat-form button:hover, #button-row button:hover, #status button:hover{
+#chat-form button:hover,
+#button-row button:hover,
+#status button:hover {
   background: linear-gradient(180deg, #b5e27a 0%, #8ec74d 100%);
 }
 
-#chat-form button:disabled, #button-row button:disabled, #status button:disabled {
+#chat-form button:disabled,
+#button-row button:disabled,
+#status button:disabled {
   background: #b1e773;
   cursor: default;
 }
@@ -438,7 +475,7 @@ input#game-id {
   color: #82b34a;
 }
 #event-log .tan {
-  color: #D2B48C;
+  color: #d2b48c;
 }
 #event-log .black {
   color: #000;
@@ -503,7 +540,9 @@ input#game-id {
   body {
     font-size: 0.8em;
   }
-  #key-list { font-size: 0.6em; }
+  #key-list {
+    font-size: 0.6em;
+  }
 }
 
 @media (orientation: landscape) {
@@ -515,10 +554,14 @@ input#game-id {
   }
 }
 @media (orientation: landscape) and (max-width: 1000px) {
-  #key-list { font-size: 0.8em; }
+  #key-list {
+    font-size: 0.8em;
+  }
 }
 @media (orientation: landscape) and (max-width: 800px) {
-  #board { font-size: 0.8em; }
+  #board {
+    font-size: 0.8em;
+  }
 }
 
 @media (orientation: portrait) {
@@ -532,11 +575,16 @@ input#game-id {
     height: 45%;
     grid-auto-rows: auto;
   }
-  #board .time-token-a, #board .time-token-b {
+  #board .time-token-a,
+  #board .time-token-b {
     font-size: 2vh;
   }
-  #board .time-token-a { left: 0.5vh; }
-  #board .time-token-b { left: 2.5vh; }
+  #board .time-token-a {
+    left: 0.5vh;
+  }
+  #board .time-token-b {
+    left: 2.5vh;
+  }
 
   #sidebar {
     flex: auto;
@@ -568,7 +616,9 @@ input#game-id {
   }
 }
 @media (orientation: portrait) and (max-width: 400px) {
-  #key-list { font-size: 0.8em; }
+  #key-list {
+    font-size: 0.8em;
+  }
 }
 @media (prefers-color-scheme: dark) {
   body {
@@ -593,7 +643,9 @@ input#game-id {
   #event-log #events {
     border-color: #444;
   }
-  input#game-id, #chat-form input, .category-select {
+  input#game-id,
+  #chat-form input,
+  .category-select {
     background: #111;
     border-color: #666;
     color: #eee;
