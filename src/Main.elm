@@ -83,6 +83,7 @@ type Msg
     | IndexData (Result Http.Error Api.Index)
     | IdChanged String
     | CategoryChanged String
+    | PlayerNameChanged String
     | SubmitNewGame
     | NextGame
     | PickSide Side.Side
@@ -128,6 +129,23 @@ update msg model =
         ( CategoryChanged category, _ ) ->
             ( { model | selectedCategory = category }, Cmd.none )
 
+        ( PlayerNameChanged name, _ ) ->
+            let
+                updatedUser =
+                    { id = model.user.id, name = name }
+
+                updatedPage =
+                    case model.page of
+                        GameInProgress g chat gameView ->
+                            GameInProgress { g | player = { user = updatedUser, side = g.player.side } } chat gameView
+
+                        _ ->
+                            model.page
+            in
+            ( { model | user = updatedUser, page = updatedPage }
+            , User.store updatedUser
+            )
+
         ( SubmitNewGame, Home id ) ->
             ( model, Nav.pushUrl model.key (UrlBuilder.relative [ id ] []) )
 
@@ -161,10 +179,13 @@ update msg model =
                 oldPlayer =
                     oldGame.player
 
+                updatedUser =
+                    { id = model.user.id, name = model.user.name }
+
                 game =
-                    { oldGame | player = { oldPlayer | side = Just side } }
+                    { oldGame | player = { oldPlayer | user = updatedUser, side = Just side } }
             in
-            ( { model | page = GameInProgress game chat gameView }
+            ( { model | page = GameInProgress game chat gameView, user = updatedUser }
             , Api.ping
                 -- Pinging will immediately record the change on the
                 -- server, without having to wait for the long
@@ -344,7 +365,7 @@ viewSidebar g chatMessage gameView selectedCategory =
     in
     case ( g.player.side, gameView ) of
         ( Nothing, _ ) ->
-            [ viewJoinASide playersOnSideA playersOnSideB ]
+            [ viewJoinASide g playersOnSideA playersOnSideB ]
 
         ( _, ShowSettings settings ) ->
             viewSettings g settings
@@ -415,19 +436,37 @@ viewButtonRow selectedCategory =
         ]
 
 
-viewJoinASide : Int -> Int -> Html Msg
-viewJoinASide a b =
+viewJoinASide : Game.Model -> Int -> Int -> Html Msg
+viewJoinASide g a b =
+    let
+        teamAName =
+            Game.teamNameForSide g Side.A
+
+        teamBName =
+            Game.teamNameForSide g Side.B
+    in
     div [ Attr.id "join-a-team" ]
         [ h3 [] [ text "Pick a side" ]
         , p [] [ text "Pick a side to start playing. Each side has a different key card." ]
-        , div [ Attr.class "buttons" ]
-            [ button [ onClick (PickSide Side.A) ]
-                [ span [ Attr.class "call-to-action" ] [ text "A" ]
-                , span [ Attr.class "details" ] [ text "(", text (String.fromInt a), text " players)" ]
+        , div [ Attr.class "name-input-wrap" ]
+            [ label [ Attr.for "player-name" ] [ text "Your name" ]
+            , input
+                [ Attr.id "player-name"
+                , Attr.type_ "text"
+                , Attr.value g.player.user.name
+                , Attr.placeholder "Your name"
+                , onInput PlayerNameChanged
                 ]
-            , button [ onClick (PickSide Side.B) ]
-                [ span [ Attr.class "call-to-action" ] [ text "B" ]
-                , span [ Attr.class "details" ] [ text "(", text (String.fromInt b), text " players)" ]
+                []
+            ]
+        , div [ Attr.class "buttons" ]
+            [ button [ Attr.class "team-button team-button-pink", onClick (PickSide Side.A) ]
+                [ span [ Attr.class "call-to-action" ] [ text "Pink team" ]
+                , span [ Attr.class "details" ] [ text (String.fromInt a), text " players" ]
+                ]
+            , button [ Attr.class "team-button team-button-blue", onClick (PickSide Side.B) ]
+                [ span [ Attr.class "call-to-action" ] [ text "Blue team" ]
+                , span [ Attr.class "details" ] [ text (String.fromInt b), text " players" ]
                 ]
             ]
         ]

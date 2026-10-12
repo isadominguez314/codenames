@@ -1,4 +1,4 @@
-module Side exposing (Side(..), decode, decodeMaybe, encode, encodeMaybe, opposite, toString)
+module Side exposing (Side(..), colorClass, colorName, decode, decodeMaybe, encode, encodeMaybe, opposite, toString)
 
 import Json.Decode
 import Json.Encode
@@ -13,10 +13,25 @@ toString : Side -> String
 toString side =
     case side of
         A ->
-            "A"
+            "Pink"
 
         B ->
-            "B"
+            "Blue"
+
+
+colorName : Side -> String
+colorName side =
+    case side of
+        A ->
+            "pink"
+
+        B ->
+            "blue"
+
+
+colorClass : Side -> String
+colorClass side =
+    "team-" ++ colorName side
 
 
 opposite : Side -> Side

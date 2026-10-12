@@ -302,28 +302,108 @@ input#game-id {
   flex: 1;
 }
 
+#join-a-team .name-input-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  margin: 1rem 0 1.2rem;
+}
+
+#join-a-team .name-input-wrap label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: #5d7d47;
+}
+
+#join-a-team .name-input-wrap input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.8rem 0.95rem;
+  border: 1px solid rgba(94, 118, 86, 0.22);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.85);
+  color: #293c4b;
+  font-size: 1rem;
+  line-height: 1.4;
+  outline: none;
+  box-shadow: inset 0 1px 2px rgba(41, 60, 75, 0.04);
+}
+
+#join-a-team .name-input-wrap input:focus {
+  border-color: rgba(121, 165, 81, 0.7);
+  box-shadow: 0 0 0 3px rgba(121, 165, 81, 0.12);
+}
+
 #join-a-team .buttons {
   display: flex;
   width: 100%;
+  gap: 0.75rem;
 }
 
 #join-a-team button {
   flex: 1;
-  margin: 0.25em;
-  background: #b1e773;
+  margin: 0;
   padding: 1em;
   border: none;
-  border-radius: 0.5em;
+  border-radius: 12px;
   cursor: pointer;
+  color: #fff;
+  box-shadow: 0 10px 18px rgba(46, 56, 72, 0.12);
+  transition:
+    transform 0.15s ease,
+    filter 0.15s ease;
 }
 
 #join-a-team button:hover {
-  background: #c3f18d;
+  filter: brightness(1.04);
+  transform: translateY(-1px);
+}
+
+#join-a-team .team-button-pink {
+  background: linear-gradient(180deg, #e99ab9 0%, #d776a5 100%);
+}
+
+#join-a-team .team-button-blue {
+  background: linear-gradient(180deg, #a7c5f5 0%, #6d9fe6 100%);
 }
 
 #join-a-team button .call-to-action {
-  font-size: 2em;
+  font-size: 1.2em;
   display: block;
+  margin-bottom: 0.25em;
+  font-weight: 700;
+}
+
+#join-a-team button .details {
+  display: block;
+  font-size: 0.9em;
+  opacity: 0.95;
+}
+
+#events .team-pink,
+#events .team-blue,
+#events .team-neutral,
+#chat-form .team-pink,
+#chat-form .team-blue,
+#chat-form .team-neutral {
+  font-weight: 700;
+}
+
+#events .team-pink,
+#chat-form .team-pink {
+  color: #d776a5;
+}
+
+#events .team-blue,
+#chat-form .team-blue {
+  color: #6d9fe6;
+}
+
+#events .team-neutral,
+#chat-form .team-neutral {
+  color: #5d7d47;
 }
 
 #key {

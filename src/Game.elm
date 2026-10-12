@@ -1,4 +1,4 @@
-module Game exposing (Model, Msg(..), init, update, viewBoard, viewEvents, viewKeycard, viewStatus)
+module Game exposing (Model, Msg(..), init, teamNameForSide, update, viewBoard, viewEvents, viewKeycard, viewStatus)
 
 import Api exposing (Event, Update)
 import Array exposing (Array)
@@ -115,6 +115,76 @@ status g =
 
             else
                 InProgress turn greens g.tokensConsumed
+
+teamNameForSide : Model -> Side -> String
+teamNameForSide model side =
+    let
+        teamOwner =
+            model.events
+                |> List.reverse
+                |> List.filterMap
+                    (\event ->
+                        case event.typ of
+                            "join_side" ->
+                                if event.side == Just side then
+                                    Just event.name
+
+                                else
+                                    Nothing
+
+                            _ ->
+                                Nothing
+                    )
+                |> List.filter (\name -> not (String.isEmpty (String.trim name)))
+                |> List.head
+    in
+    case teamOwner of
+        Just name ->
+            name ++ "'s team"
+
+        Nothing ->
+            if model.player.side == Just side then
+                if String.isEmpty (String.trim model.player.user.name) then
+                    Side.toString side ++ " team"
+
+                else
+                    model.player.user.name ++ "'s team"
+
+            else
+                Side.toString side ++ " team"
+
+teamColorClass : Model -> Side -> String
+teamColorClass model side =
+    let
+        teamOwner =
+            model.events
+                |> List.reverse
+                |> List.filterMap
+                    (\event ->
+                        case event.typ of
+                            "join_side" ->
+                                if event.side == Just side then
+                                    Just event.name
+
+                                else
+                                    Nothing
+
+                            _ ->
+                                Nothing
+                    )
+                |> List.filter (\name -> not (String.isEmpty (String.trim name)))
+                |> List.head
+    in
+    case teamOwner of
+        Just _ ->
+            Side.colorClass side
+
+        Nothing ->
+            if model.player.side == Just side then
+                Side.colorClass side
+
+            else
+                "team-neutral"
 
 
 remainingGreen : Array Cell -> Int
@@ -458,15 +528,14 @@ viewEvents model =
 viewWelcomeMessage : Html Msg
 viewWelcomeMessage =
     div [ Attr.class "system-message" ] [ text """
-    Welcome! Codenames Green is a cooperative word game. Players divide into
-    two sides. Each side has nine green words that they must provide clues for.
-    Sides take turns giving one-word clues, plus a number indicating the
-    number of words it applies to. Then the other side guesses until they tap
-    a non-green word or choose to stop. Tapping a black instantly loses the game.
-    Try to reveal all green words before the timer counter reaches 9.
-    Good luck, have fun!
-
-    Don't forget: fuck ICE, Trump and all fascist enablers ✊
+    
+    Welcome Pierce! As you probably already know, Codenames Green is a 
+    cooperative word game. Players divide into two sides. Each side has nine green
+    words that they must provide clues for. Sides take turns giving one word clues, 
+    plus a number indicating the number of words it applies to. Then the other side
+    guesses until they tap a non-green word or choose to stop. Tapping a black 
+    instantly loses the game. Try to reveal all words before the game ends after 9 
+    turns. Good luck, I love you!!!
     """ ]
 
 
@@ -474,12 +543,17 @@ viewEvent : Model -> Event -> Html Msg
 viewEvent model e =
     case e.typ of
         "join_side" ->
-            div []
-                [ text e.name
-                , text " has joined side "
-                , text (e.side |> Maybe.map Side.toString |> Maybe.withDefault "")
-                , text "."
-                ]
+            case e.side of
+                Just side ->
+                    div []
+                        [ span [ Attr.class (Side.colorClass side) ] [ text e.name ]
+                        , text " has joined the "
+                        , span [ Attr.class (Side.colorClass side) ] [ text (Side.toString side) ]
+                        , text " team."
+                        ]
+
+                Nothing ->
+                    text ""
 
         "player_left" ->
             div [] [ text e.name, text " has left the game." ]
@@ -488,9 +562,15 @@ viewEvent model e =
             Array.get e.index model.cells
                 |> Maybe.map2
                     (\s c ->
+                        let
+                            teamLabel =
+                                teamNameForSide model s
+
+                            teamColor =
+                                teamColorClass model s
+                        in
                         div []
-                            [ text "Side "
-                            , text (Side.toString s)
+                            [ span [ Attr.class teamColor ] [ text teamLabel ]
                             , text " tapped "
                             , span [ Attr.class "chat-color", Attr.class (Color.toString (Cell.oppColor s c)) ] [ text c.word ]
                             , text "."
@@ -504,12 +584,12 @@ viewEvent model e =
                 sideEl =
                     case e.side of
                         Just s ->
-                            span [ Attr.class "side" ] [ text (" (" ++ Side.toString s ++ ")") ]
+                            span [ Attr.class "side", Attr.class (Side.colorClass s) ] [ text (" (" ++ Side.toString s ++ ")") ]
 
                         Nothing ->
                             text ""
             in
-            div [] [ text e.name, sideEl, text ": ", text e.message ]
+            div [] [ span [ Attr.class "name" ] [ text e.name ], sideEl, text ": ", text e.message ]
 
         "end_turn" ->
             case e.side of
@@ -517,7 +597,7 @@ viewEvent model e =
                     text ""
 
                 Just side ->
-                    div [] [ text "Side ", text (Side.toString side), text " took a timer token ending the turn." ]
+                    div [] [ text (Side.toString side), text " team took a timer token ending the turn." ]
 
         _ ->
             text ""
